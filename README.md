@@ -9,7 +9,8 @@ The initial dataset for this project will be the Pokemon Sprites Images dataset 
 
 PyTorch will be the deep learning framework used for the implementation of the model. The framework will be used for data handling and preprocessing, definition of the model’s architecture as well as its training and evaluation. PyTorch Profiling is going to assist with detecting and visualizing bottlenecks in the code. Docker will be used for the deployment part in order to ensure the producibility of the project. Weights and Biases (wandb) will track experiments, monitor metrics, and will help with sharing the results and visualizations among members. We will use the implementation provided in the GitHub repository below as a starting point for our project, to ensure a baseline model. Over the following weeks we will gradually be building upon it to establish a strong and robust pipeline.  
 
-
+Link to GitHub repository containing the VDM PyTorch implementation: 
+https://github.com/addtt/variational-diffusion-models.git
 
 
 
