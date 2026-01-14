@@ -1,0 +1,17 @@
+method: bayes   # can be "grid", "random", or "bayes" for Bayesian optimization
+metric:
+  name: val/elbo   # the metric to optimize
+  goal: minimize   # you want ELBO as low as possible
+parameters:
+  learning_rate:
+    min: 0.0001
+    max: 0.001
+  batch_size:
+    values: [8, 16, 32]
+  gamma_min:
+    values: [-15, -13, -10]
+  gamma_max:
+    values: [5, 7, 10]
+command:
+  - python
+  - train.py
