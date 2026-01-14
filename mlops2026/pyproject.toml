@@ -33,3 +33,9 @@ select = ["I", "N", "E", "W", ]
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.8.0",
+    "pytest>=8.3.4",
+]
