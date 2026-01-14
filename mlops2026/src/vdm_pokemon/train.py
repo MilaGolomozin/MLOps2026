@@ -1,5 +1,5 @@
-from vdm_pokemon.model import VDM
-from vdm_pokemon.data import get_cifar10_dataloaders
+from model import VDM
+from data import get_pokemon_dataloaders
 from unet import UNet
 
 import math
@@ -34,7 +34,7 @@ def main():
     run = wandb.init(
         project="MLOPS2026",
         config={
-            "dataset": "CIFAR10",
+            "dataset": "Pokemon",
             "epochs": 20,
             "learning_rate": 5e-4,
             "batch_size": 64,
@@ -49,7 +49,8 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Data
-    train_loader, val_loader = get_cifar10_dataloaders(
+    train_loader, val_loader = get_pokemon_dataloaders(
+        data_dir=f"/zhome/68/a/168414/kagglehub/datasets/yehongjiang/pokemon-sprites-images",
         batch_size=cfg.batch_size
     )
 
