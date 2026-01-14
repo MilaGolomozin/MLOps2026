@@ -140,7 +140,7 @@ def main():
         wandb.log({
             "final/samples_grid": wandb.Image(grid)
         })
-
+    torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
     run.finish()
 
 
