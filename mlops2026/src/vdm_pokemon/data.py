@@ -86,7 +86,7 @@ from torchvision import datasets, transforms
 
 def get_pokemon_dataloaders(
     data_dir,
-    image_size=32,
+    image_size=64,
     batch_size=64,
     num_workers=4,
     pin_memory=True,

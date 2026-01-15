@@ -98,13 +98,13 @@ app = FastAPI(title="VDM Pokémon Inference API")
 # ---------------------------
 class InferenceRequest(BaseModel):
     batch_size: Optional[int] = 1
-    n_sample_steps: Optional[int] = 50
+    n_sample_steps: Optional[int] = 250
 
 # ---------------------------
 # Load model
 # ---------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-image_shape = (3, 32, 32)
+image_shape = (3, 64, 64)
 
 # Initialize UNet and VDM
 unet_model = UNet(in_channels=3).to(device)
@@ -139,23 +139,47 @@ def root():
 # ---------------------------
 # Inference endpoint
 # ---------------------------
+from fastapi.responses import Response
+
 @app.post("/generate")
 def generate(req: InferenceRequest):
     with torch.no_grad():
         samples = vdm.sample(
-            batch_size=req.batch_size,
+            batch_size=1,                     # force single image
             n_sample_steps=req.n_sample_steps,
-            clip_samples=True
+            clip_samples=True,
         )
 
-    # Convert each sample to base64
-    images_base64 = [tensor_to_base64(img) for img in samples]
+    img = samples[0].clamp(-1, 1)
+    img = (img + 1) / 2  # [-1,1] → [0,1]
+    img = (img * 255).byte().cpu()
+    img = img.permute(1, 2, 0).numpy()
 
-    return {
-        "batch_size": req.batch_size,
-        "n_sample_steps": req.n_sample_steps,
-        "images": images_base64
-    }
+    pil_img = Image.fromarray(img)
+    buffer = io.BytesIO()
+    pil_img.save(buffer, format="PNG")
+
+    return Response(
+        content=buffer.getvalue(),
+        media_type="image/png"
+    )
+# @app.post("/generate")
+# def generate(req: InferenceRequest):
+#     with torch.no_grad():
+#         samples = vdm.sample(
+#             batch_size=req.batch_size,
+#             n_sample_steps=req.n_sample_steps,
+#             clip_samples=True
+#         )
+
+#     # Convert each sample to base64
+#     images_base64 = [tensor_to_base64(img) for img in samples]
+
+#     return {
+#         "batch_size": req.batch_size,
+#         "n_sample_steps": req.n_sample_steps,
+#         "images": images_base64
+#     }
 
 # from fastapi import FastAPI
 # app = FastAPI()

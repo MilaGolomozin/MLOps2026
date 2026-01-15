@@ -17,7 +17,7 @@ def evaluate_vdm(vdm, dataloader, device):
     total_loss = 0.0
     total_batches = 0
 
-    with torch.enable_grad():
+    with torch.no_grad():        #with torch.enable_grad():
         for x, _ in dataloader:
             x = x.to(device)
             loss, _ = vdm(x)
@@ -35,7 +35,7 @@ def main():
         project="MLOPS2026",
         config={
             "dataset": "Pokemon",
-            "epochs": 20,
+            "epochs": 50,
             "learning_rate": 5e-4,
             "batch_size": 64,
             "image_size": 32,
@@ -54,10 +54,15 @@ def main():
         batch_size=cfg.batch_size
     )
 
-    image_shape = (3, 32, 32)
+    image_shape = (3, 64, 64)
 
     # Model
     model = UNet(in_channels=3).to(device)
+
+    #ema = EMA(model, beta=0.9999)
+
+    #ema.load_state_dict(torch.load("vdm_ema.pth"))
+    #ema_model = ema.ema_model
 
     vdm = VDM(
         model=model,
@@ -130,7 +135,7 @@ def main():
     with torch.no_grad():
         samples = vdm_ema.sample(
             batch_size=16,
-            n_sample_steps=50,
+            n_sample_steps=250,
             clip_samples=True
         )
         samples = samples.clamp(-1, 1)

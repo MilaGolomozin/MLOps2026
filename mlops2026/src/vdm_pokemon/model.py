@@ -176,46 +176,83 @@ class VDM(nn.Module):
         # Sum over dimensions: [B, D] → [B]
         return selected_log_probs.sum(dim=1)
     
-    def sample(self, batch_size, n_sample_steps=50, clip_samples=True):
-        """
-        Generate samples from the trained VDM model.
+    # def sample(self, batch_size, n_sample_steps=50, clip_samples=True):
+    #     """
+    #     Generate samples from the trained VDM model.
         
-        Args:
-            batch_size (int): number of samples to generate
-            n_sample_steps (int): number of reverse diffusion steps
-            clip_samples (bool): whether to clip samples to [-1,1] for visualization
+    #     Args:
+    #         batch_size (int): number of samples to generate
+    #         n_sample_steps (int): number of reverse diffusion steps
+    #         clip_samples (bool): whether to clip samples to [-1,1] for visualization
 
-        Returns:
-            x: [B,C,H,W] sampled images
-        """
+    #     Returns:
+    #         x: [B,C,H,W] sampled images
+    #     """
+    #     device = self.device
+    #     B, C, H, W = batch_size, *self.image_shape
+    #     # Start from standard normal noise
+    #     x_t = torch.randn(batch_size, *self.image_shape, device=device)
+        
+    #     # Linear time steps from 1 to 0
+    #     times = torch.linspace(1.0, 0.0, n_sample_steps, device=device)
+
+    #     for t in times:
+    #         t_batch = torch.full((batch_size,), t, device=device)
+    #         gamma_t = self.gamma(t_batch)[:, None, None, None]
+
+    #         # Predict noise using the model
+    #         with torch.no_grad():
+    #             pred_noise = self.model(x_t, gamma_t)
+
+    #         # Compute alpha and sigma
+    #         alpha = torch.sqrt(torch.sigmoid(-gamma_t))
+    #         sigma = torch.sqrt(torch.sigmoid(gamma_t))
+
+    #         # Reverse diffusion step: simple ancestral step
+    #         x0_pred = (x_t - sigma * pred_noise) / alpha
+    #         x_t = alpha * x0_pred + sigma * pred_noise  # update x_t
+
+    #         if clip_samples:
+    #             x_t = x_t.clamp(-1, 1)
+
+    #     return x_t
+
+    def sample(self, batch_size, n_sample_steps=250, clip_samples=True):
         device = self.device
-        B, C, H, W = batch_size, *self.image_shape
-        # Start from standard normal noise
         x_t = torch.randn(batch_size, *self.image_shape, device=device)
-        
-        # Linear time steps from 1 to 0
-        times = torch.linspace(1.0, 0.0, n_sample_steps, device=device)
 
-        for t in times:
+        times = torch.linspace(1.0, 0.0, n_sample_steps + 1, device=device)
+
+        for i in range(n_sample_steps):
+            t = times[i]
+            t_next = times[i + 1]
+
             t_batch = torch.full((batch_size,), t, device=device)
+            t_next_batch = torch.full((batch_size,), t_next, device=device)
+
             gamma_t = self.gamma(t_batch)[:, None, None, None]
+            gamma_next = self.gamma(t_next_batch)[:, None, None, None]
 
-            # Predict noise using the model
+            alpha_t = torch.sqrt(torch.sigmoid(-gamma_t))
+            sigma_t = torch.sqrt(torch.sigmoid(gamma_t))
+
+            alpha_next = torch.sqrt(torch.sigmoid(-gamma_next))
+            sigma_next = torch.sqrt(torch.sigmoid(gamma_next))
+
             with torch.no_grad():
-                pred_noise = self.model(x_t, gamma_t)
+                eps = self.model(x_t, gamma_t)
 
-            # Compute alpha and sigma
-            alpha = torch.sqrt(torch.sigmoid(-gamma_t))
-            sigma = torch.sqrt(torch.sigmoid(gamma_t))
+            # Predict x0
+            x0_pred = (x_t - sigma_t * eps) / alpha_t
 
-            # Reverse diffusion step: simple ancestral step
-            x0_pred = (x_t - sigma * pred_noise) / alpha
-            x_t = alpha * x0_pred + sigma * pred_noise  # update x_t
+            # DDIM update (η = 0)
+            x_t = alpha_next * x0_pred + sigma_next * eps
 
             if clip_samples:
                 x_t = x_t.clamp(-1, 1)
 
         return x_t
+
 
 
 
