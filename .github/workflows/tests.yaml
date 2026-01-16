@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     strategy:
-      # M17 Best Practice: Don't cancel other OS jobs if one fails
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
@@ -30,17 +29,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # Explicitly install base ML requirements to avoid torch/numpy errors
-        pip install numpy pytest
-        # Install your specific project requirements
+        pip install pytest numpy torch
         pip install -r mlops2026/requirements.txt
-        # Universal way to handle the extra tests file
-        python -c "import os; os.system('pip install -r mlops2026/requirements_tests.txt') if os.path.exists('mlops2026/requirements_tests.txt') else print('No extra tests file found')"
+        # If your tests depend on your own code, install it locally
+        pip install -e mlops2026/src/vdm_pokemon/.. || echo "Skipping local install"
 
     - name: Test with pytest
-      run: |
-        pytest -v
-      env:
-        # code folder
-        PYTHONPATH: ${{ github.workspace }}/mlops2026/src
-    
+      # This runs pytest from the root, but uses the pytest.ini for paths
+      run: pytest -v
