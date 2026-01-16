@@ -40,4 +40,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v
+      env:
+        # code folder
+        PYTHONPATH: ${{ github.workspace }}/mlops2026/src
     
