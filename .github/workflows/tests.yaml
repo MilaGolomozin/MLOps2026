@@ -1,0 +1,48 @@
+name: "Run tests"
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+        cache: 'pip'
+        cache-dependency-path: 'mlops2026/requirements.txt'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest numpy
+        
+        # Install EVERYTHING from the requirements file EXCEPT torch/torchvision first
+        grep -vE "torch|torchvision" mlops2026/requirements.txt > temp_requirements.txt || true
+        pip install -r temp_requirements.txt
+        
+        # Now install the ML stack together from the CPU index
+        # We use 2.5.1 because it is the most stable version for torchvision compatibility right now
+        pip install torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cpu
+      shell: bash
+
+    - name: Test with pytest
+      working-directory: ./mlops2026
+      run: |
+        pytest -v
+      env:
+        PYTHONPATH: src

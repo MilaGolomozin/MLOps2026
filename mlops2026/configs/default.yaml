@@ -1,0 +1,36 @@
+defaults:
+  - _self_
+
+project_name: "MLOPS2026"
+
+dataset:
+  name: "CIFAR10"
+  image_size: 32
+
+model:
+  name: "UNet"
+  in_channels: 3
+
+training:
+  epochs: 20
+  batch_size: 64
+  learning_rate: 5e-4
+  ema_decay: 0.999
+  log_interval: 100
+  sample_every_epochs: 5
+  num_samples: 16
+
+vdm:
+  gamma_min: -13.3
+  gamma_max: 5.0
+
+wandb:
+  project: "MLOPS2026"
+  entity: null
+  run_name: "baseline_unet_cifar10"
+
+# Hydra-specific settings
+hydra:
+  run:
+    dir: .      # keep working directory unchanged
+

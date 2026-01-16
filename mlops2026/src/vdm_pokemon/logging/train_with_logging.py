@@ -1,9 +1,6 @@
 from model import VDM
 from data import get_pokemon_dataloaders
 from unet import UNet
-import hydra
-from omegaconf import DictConfig, OmegaConf
-
 
 import math
 import torch
@@ -11,6 +8,14 @@ import torch.optim as optim
 from torchvision.utils import make_grid
 from ema_pytorch import EMA
 import wandb
+
+import sys
+from loguru import logger
+
+#setup the log file
+logger.remove()
+logger.add(sys.stderr, level="INFO")
+logger.add("vdm_training.log", level="DEBUG", rotation="50 MB")
 
 # ---------------------------------------------------------
 # Evaluation
@@ -38,7 +43,7 @@ def main():
         project="MLOPS2026",
         config={
             "dataset": "Pokemon",
-            "epochs": 50,
+            "epochs": 10,
             "learning_rate": 5e-4,
             "batch_size": 64,
             "image_size": 32,
@@ -53,7 +58,7 @@ def main():
 
     # Data
     train_loader, val_loader = get_pokemon_dataloaders(
-        data_dir=f"/zhome/68/a/168414/kagglehub/datasets/yehongjiang/pokemon-sprites-images",
+        data_dir=f"/zhome/07/3/219372/.cache/kagglehub/datasets/yehongjiang/pokemon-sprites-images/versions/1",
         batch_size=cfg.batch_size
     )
 
@@ -87,28 +92,41 @@ def main():
     # ---------------------------------------------------------
     # Training loop
     # ---------------------------------------------------------
+    
+
     for epoch in range(cfg.epochs):
         model.train()
         running_loss = 0.0
 
-        for x, _ in train_loader:
+        for batch_idx, (x, _) in enumerate(train_loader):
             x = x.to(device)
-
             optimizer.zero_grad()
             loss, metrics = vdm(x)
+            
+            #Mathematical Stability 
+            if torch.isnan(loss) or torch.isinf(loss):
+                logger.critical(f"Numerical instability at Epoch {epoch+1}, Batch {batch_idx}!")
+                logger.error(f"Loss: {loss.item()} | Gamma Min: {cfg.gamma_min} | Gamma Max: {cfg.gamma_max}")
+                run.finish()
+                sys.exit(1) 
+
             loss.backward()
             optimizer.step()
             ema.update()
+
+            #Progress Heartbeat
+            # Log every 50 batches to the .log file
+            if batch_idx % 50 == 0:
+                logger.debug(f"Epoch {epoch+1} | Batch {batch_idx}/{len(train_loader)} | Loss: {loss.item():.4f}")
 
             wandb.log({
                 "train/loss_batch": loss.item(),
                 **{f"train/{k}": v for k, v in metrics.items()},
             })
-
             running_loss += loss.item()
 
         avg_loss = running_loss / len(train_loader)
-        print(f"Epoch {epoch+1}/{cfg.epochs} | Avg Loss: {avg_loss:.4f}")
+        logger.info(f"Completed Epoch {epoch+1}/{cfg.epochs} | Avg Loss: {avg_loss:.4f}")
 
         # ----------------------------------
         # Validation (EMA model)
@@ -148,9 +166,16 @@ def main():
         wandb.log({
             "final/samples_grid": wandb.Image(grid)
         })
-    torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
-    run.finish()
+    #Artifact Saving (REPLACES YOUR OLD LINES) ---
+    logger.info("Training finished. Saving EMA model...")
+    try:
+        torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
+        logger.success("Model saved successfully as 'vdm_ema.pth'")
+    except Exception as e:
+        logger.error(f"Failed to save model: {e}")
 
+    run.finish()
+    logger.info("WandB run closed. HPC job exiting.")
 
 if __name__ == "__main__":
     main()

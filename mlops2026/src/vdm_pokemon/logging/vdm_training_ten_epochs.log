@@ -1,0 +1,43 @@
+2026-01-15 17:39:36.504 | DEBUG    | __main__:main:120 - Epoch 1 | Batch 0/143 | Loss: 15.1428
+2026-01-15 17:39:49.998 | DEBUG    | __main__:main:120 - Epoch 1 | Batch 50/143 | Loss: 6.6529
+2026-01-15 17:40:03.489 | DEBUG    | __main__:main:120 - Epoch 1 | Batch 100/143 | Loss: 5.7149
+2026-01-15 17:40:14.847 | INFO     | __main__:main:129 - Completed Epoch 1/10 | Avg Loss: 6.5668
+2026-01-15 17:40:17.778 | DEBUG    | __main__:main:120 - Epoch 2 | Batch 0/143 | Loss: 4.6527
+2026-01-15 17:40:31.234 | DEBUG    | __main__:main:120 - Epoch 2 | Batch 50/143 | Loss: 3.8762
+2026-01-15 17:40:44.695 | DEBUG    | __main__:main:120 - Epoch 2 | Batch 100/143 | Loss: 2.7086
+2026-01-15 17:40:56.026 | INFO     | __main__:main:129 - Completed Epoch 2/10 | Avg Loss: 3.2976
+2026-01-15 17:40:58.892 | DEBUG    | __main__:main:120 - Epoch 3 | Batch 0/143 | Loss: 2.7782
+2026-01-15 17:41:12.348 | DEBUG    | __main__:main:120 - Epoch 3 | Batch 50/143 | Loss: 2.5454
+2026-01-15 17:41:25.840 | DEBUG    | __main__:main:120 - Epoch 3 | Batch 100/143 | Loss: 2.4660
+2026-01-15 17:41:37.233 | INFO     | __main__:main:129 - Completed Epoch 3/10 | Avg Loss: 2.6234
+2026-01-15 17:41:40.099 | DEBUG    | __main__:main:120 - Epoch 4 | Batch 0/143 | Loss: 2.3005
+2026-01-15 17:41:53.580 | DEBUG    | __main__:main:120 - Epoch 4 | Batch 50/143 | Loss: 2.1745
+2026-01-15 17:42:07.076 | DEBUG    | __main__:main:120 - Epoch 4 | Batch 100/143 | Loss: 2.3962
+2026-01-15 17:42:18.453 | INFO     | __main__:main:129 - Completed Epoch 4/10 | Avg Loss: 2.3451
+2026-01-15 17:42:21.336 | DEBUG    | __main__:main:120 - Epoch 5 | Batch 0/143 | Loss: 2.3559
+2026-01-15 17:42:34.799 | DEBUG    | __main__:main:120 - Epoch 5 | Batch 50/143 | Loss: 2.2078
+2026-01-15 17:42:48.294 | DEBUG    | __main__:main:120 - Epoch 5 | Batch 100/143 | Loss: 2.4980
+2026-01-15 17:42:59.672 | INFO     | __main__:main:129 - Completed Epoch 5/10 | Avg Loss: 2.2305
+2026-01-15 17:43:02.558 | DEBUG    | __main__:main:120 - Epoch 6 | Batch 0/143 | Loss: 2.0674
+2026-01-15 17:43:16.042 | DEBUG    | __main__:main:120 - Epoch 6 | Batch 50/143 | Loss: 2.3610
+2026-01-15 17:43:29.551 | DEBUG    | __main__:main:120 - Epoch 6 | Batch 100/143 | Loss: 1.9711
+2026-01-15 17:43:40.924 | INFO     | __main__:main:129 - Completed Epoch 6/10 | Avg Loss: 2.1236
+2026-01-15 17:43:43.907 | DEBUG    | __main__:main:120 - Epoch 7 | Batch 0/143 | Loss: 2.2702
+2026-01-15 17:43:57.417 | DEBUG    | __main__:main:120 - Epoch 7 | Batch 50/143 | Loss: 1.8480
+2026-01-15 17:44:10.932 | DEBUG    | __main__:main:120 - Epoch 7 | Batch 100/143 | Loss: 2.0672
+2026-01-15 17:44:22.313 | INFO     | __main__:main:129 - Completed Epoch 7/10 | Avg Loss: 2.0510
+2026-01-15 17:44:25.207 | DEBUG    | __main__:main:120 - Epoch 8 | Batch 0/143 | Loss: 1.9390
+2026-01-15 17:44:38.659 | DEBUG    | __main__:main:120 - Epoch 8 | Batch 50/143 | Loss: 1.9032
+2026-01-15 17:44:52.153 | DEBUG    | __main__:main:120 - Epoch 8 | Batch 100/143 | Loss: 2.3339
+2026-01-15 17:45:03.547 | INFO     | __main__:main:129 - Completed Epoch 8/10 | Avg Loss: 2.0197
+2026-01-15 17:45:06.516 | DEBUG    | __main__:main:120 - Epoch 9 | Batch 0/143 | Loss: 1.8602
+2026-01-15 17:45:20.027 | DEBUG    | __main__:main:120 - Epoch 9 | Batch 50/143 | Loss: 2.0228
+2026-01-15 17:45:33.536 | DEBUG    | __main__:main:120 - Epoch 9 | Batch 100/143 | Loss: 2.0446
+2026-01-15 17:45:44.915 | INFO     | __main__:main:129 - Completed Epoch 9/10 | Avg Loss: 1.9094
+2026-01-15 17:45:47.801 | DEBUG    | __main__:main:120 - Epoch 10 | Batch 0/143 | Loss: 1.7519
+2026-01-15 17:46:01.284 | DEBUG    | __main__:main:120 - Epoch 10 | Batch 50/143 | Loss: 2.1248
+2026-01-15 17:46:14.790 | DEBUG    | __main__:main:120 - Epoch 10 | Batch 100/143 | Loss: 1.9759
+2026-01-15 17:46:26.183 | INFO     | __main__:main:129 - Completed Epoch 10/10 | Avg Loss: 1.9330
+2026-01-15 17:46:33.211 | INFO     | __main__:main:170 - Training finished. Saving EMA model...
+2026-01-15 17:46:33.562 | SUCCESS  | __main__:main:173 - Model saved successfully as 'vdm_ema.pth'
+2026-01-15 17:46:34.761 | INFO     | __main__:main:178 - WandB run closed. HPC job exiting.

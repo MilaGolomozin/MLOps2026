@@ -1,5 +1,5 @@
-from model import VDM
-from data import get_pokemon_dataloaders
+from vdm_pokemon.model import VDM
+from vdm_pokemon.data import get_cifar10_dataloaders
 from unet import UNet
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -20,7 +20,7 @@ def evaluate_vdm(vdm, dataloader, device):
     total_loss = 0.0
     total_batches = 0
 
-    with torch.no_grad():        #with torch.enable_grad():
+    with torch.enable_grad():
         for x, _ in dataloader:
             x = x.to(device)
             loss, _ = vdm(x)
@@ -33,39 +33,27 @@ def evaluate_vdm(vdm, dataloader, device):
 # ---------------------------------------------------------
 # Training
 # ---------------------------------------------------------
-def main():
+@hydra.main(config_path="../../configs", config_name="config", version_base=None)
+def main(cfg: DictConfig):
+    # Initialize W&B using Hydra config
     run = wandb.init(
-        project="MLOPS2026",
-        config={
-            "dataset": "Pokemon",
-            "epochs": 50,
-            "learning_rate": 5e-4,
-            "batch_size": 64,
-            "image_size": 32,
-            "model": "UNet",
-            "gamma_min": -13.3,
-            "gamma_max": 5.0,
-        },
+        project=cfg.wandb.project,
+        name=cfg.wandb.run_name,
+        config=OmegaConf.to_container(cfg, resolve=True),
     )
-    cfg = wandb.config
+    cfg = wandb.config  # keep using cfg.* as before, but now cfg comes from Hydra
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Data
-    train_loader, val_loader = get_pokemon_dataloaders(
-        data_dir=f"/zhome/68/a/168414/kagglehub/datasets/yehongjiang/pokemon-sprites-images",
+    train_loader, val_loader = get_cifar10_dataloaders(
         batch_size=cfg.batch_size
     )
 
-    image_shape = (3, 64, 64)
+    image_shape = (3, cfg.image_size, cfg.image_size)
 
     # Model
     model = UNet(in_channels=3).to(device)
-
-    #ema = EMA(model, beta=0.9999)
-
-    #ema.load_state_dict(torch.load("vdm_ema.pth"))
-    #ema_model = ema.ema_model
 
     vdm = VDM(
         model=model,
@@ -108,37 +96,22 @@ def main():
             running_loss += loss.item()
 
         avg_loss = running_loss / len(train_loader)
-        print(f"Epoch {epoch+1}/{cfg.epochs} | Avg Loss: {avg_loss:.4f}")
+        wandb.log({"train/loss_epoch": avg_loss}, step=epoch)
 
-        # ----------------------------------
-        # Validation (EMA model)
-        # ----------------------------------
-        ema_model = ema.ema_model
-        vdm_ema = VDM(
-            model=ema_model,
-            image_shape=image_shape,
-            gamma_min=cfg.gamma_min,
-            gamma_max=cfg.gamma_max,
-        ).to(device)
-
-        val_elbo = evaluate_vdm(vdm_ema, val_loader, device)
-        print(f"→ Validation ELBO (EMA): {val_elbo:.4f}")
-
-        wandb.log({
-            "train/loss_epoch": avg_loss,
-            "val/elbo": val_elbo,
-            "epoch": epoch + 1,
-            "lr": optimizer.param_groups[0]["lr"],
-        })
+        # ---------------------------------------------------------
+        # Evaluation
+        # ---------------------------------------------------------
+        val_loss = evaluate_vdm(vdm, val_loader, device)
+        wandb.log({"val/loss": val_loss}, step=epoch)
 
     # ---------------------------------------------------------
-    # Final Sampling
+    # Final sampling (as in your original code)
     # ---------------------------------------------------------
-    vdm_ema.eval()
+    model.eval()
     with torch.no_grad():
-        samples = vdm_ema.sample(
-            batch_size=16,
-            n_sample_steps=250,
+        samples = vdm.sample(
+            num_samples=16,
+            n_sample_steps=50,
             clip_samples=True
         )
         samples = samples.clamp(-1, 1)
@@ -148,7 +121,7 @@ def main():
         wandb.log({
             "final/samples_grid": wandb.Image(grid)
         })
-    torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
+
     run.finish()
 
 
