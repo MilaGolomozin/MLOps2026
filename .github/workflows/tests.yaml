@@ -24,16 +24,21 @@ jobs:
       with:
         python-version: 3.12
         cache: 'pip'
+        # Caching needs the path relative to repo root
         cache-dependency-path: 'mlops2026/requirements.txt'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pytest numpy torch
+        #use the relative path here because we aren't in the subfolder yet
         pip install -r mlops2026/requirements.txt
-        # If your tests depend on your own code, install it locally
-        pip install -e mlops2026/src/vdm_pokemon/.. || echo "Skipping local install"
 
     - name: Test with pytest
-      # This runs pytest from the root, but uses the pytest.ini for paths
-      run: pytest -v
+      
+      working-directory: ./mlops2026
+      run: |
+        pytest -v
+      env:
+        #'src' is the place to look for packages
+        PYTHONPATH: src
