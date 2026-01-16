@@ -8,28 +8,34 @@ on:
 
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
     strategy:
+      # M17 Best Practice: Don't cancel other OS jobs if one fails
+      fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
+    runs-on: ${{ matrix.os }}
+
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: 3.12
+        cache: 'pip'
+        cache-dependency-path: 'mlops2026/requirements.txt'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        # Explicitly install base ML requirements to avoid torch/numpy errors
+        pip install numpy pytest
+        # Install your specific project requirements
         pip install -r mlops2026/requirements.txt
-        pip install -r mlops2026/requirements_tests.txt
-        pip list
+        # Universal way to handle the extra tests file
+        python -c "import os; os.system('pip install -r mlops2026/requirements_tests.txt') if os.path.exists('mlops2026/requirements_tests.txt') else print('No extra tests file found')"
 
     - name: Test with pytest
       run: |
