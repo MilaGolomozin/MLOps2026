@@ -8,32 +8,30 @@ on:
 
 jobs:
   build:
-    #Multi-OS 
+
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-    
-    runs-on: ${{ matrix.os }}
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: 3.12
-        #Caching
-        cache: 'pip'
-        cache-dependency-path: 'mlops2026/requirements.txt'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pytest
         pip install -r mlops2026/requirements.txt
-        #if the file exists, pip will install it
-        python -c "import os; os.system('pip install -r mlops2026/requirements_tests.txt') if os.path.exists('mlops2026/requirements_tests.txt') else print('No extra tests file found')"
+        pip install -r mlops2026/requirements_tests.txt
+        pip list
+
     - name: Test with pytest
       run: |
         pytest -v
+    
