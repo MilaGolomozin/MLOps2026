@@ -77,16 +77,20 @@
 # def root():
 #     return {"message": "VDM Pokémon Inference API is running"}
 
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import Optional
-import torch
-from model import VDM
-from unet import UNet
-from torchvision.utils import make_grid
-from PIL import Image
-import io
 import base64
+import io
+import os
+from pathlib import Path
+from typing import Optional
+
+import torch
+from fastapi import FastAPI
+from fastapi.responses import Response
+from PIL import Image
+from pydantic import BaseModel
+
+from vdm_pokemon.model import VDM
+from vdm_pokemon.unet import UNet
 
 # ---------------------------
 # FastAPI app
@@ -97,6 +101,7 @@ app = FastAPI(title="VDM Pokémon Inference API")
 # Input schema
 # ---------------------------
 class InferenceRequest(BaseModel):
+    """Define the request body for image generation."""
     batch_size: Optional[int] = 1
     n_sample_steps: Optional[int] = 250
 
@@ -115,14 +120,16 @@ vdm = VDM(
     gamma_max=5.0
 ).to(device)
 
-# Load trained EMA model weights
-vdm.model.load_state_dict(torch.load("vdm_ema.pth", map_location=device))
+weights_path = Path(os.getenv("VDM_WEIGHTS_PATH", "vdm_ema.pth"))
+if weights_path.is_file():
+    vdm.model.load_state_dict(torch.load(weights_path, map_location=device))
 vdm.eval()
 
 # ---------------------------
 # Helper: tensor -> base64 image
 # ---------------------------
-def tensor_to_base64(img_tensor):
+def tensor_to_base64(img_tensor: torch.Tensor) -> str:
+    """Convert a tensor image to a base64 encoded png string."""
     img_tensor = (img_tensor.clamp(-1,1) + 1) / 2  # scale to [0,1]
     img_pil = Image.fromarray((img_tensor.permute(1,2,0).cpu().numpy()*255).astype("uint8"))
     buffered = io.BytesIO()
@@ -133,16 +140,16 @@ def tensor_to_base64(img_tensor):
 # Health check
 # ---------------------------
 @app.get("/")
-def root():
+def root() -> dict[str, str]:
+    """Return a health check message."""
     return {"message": "VDM Pokémon Inference API is running"}
 
 # ---------------------------
 # Inference endpoint
 # ---------------------------
-from fastapi.responses import Response
-
 @app.post("/generate")
-def generate(req: InferenceRequest):
+def generate(req: InferenceRequest) -> Response:
+    """Generate a png image from the model."""
     with torch.no_grad():
         samples = vdm.sample(
             batch_size=1,                     # force single image
