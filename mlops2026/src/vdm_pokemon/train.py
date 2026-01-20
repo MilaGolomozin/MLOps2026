@@ -1,8 +1,8 @@
 from model import VDM
 from data import get_pokemon_dataloaders
 from unet import UNet
-import hydra
-from omegaconf import DictConfig, OmegaConf
+#import hydra
+#from omegaconf import DictConfig, OmegaConf
 
 
 import math
@@ -148,7 +148,22 @@ def main():
         wandb.log({
             "final/samples_grid": wandb.Image(grid)
         })
-    torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
+
+
+    # torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
+    # Save model checkpoint
+    checkpoint_path = "vdm_ema.pth"
+    torch.save(vdm_ema.model.state_dict(), checkpoint_path)
+
+    # Log checkpoint to W&B
+    artifact = wandb.Artifact(
+        name="vdm_ema_model",
+        type="model",
+        description="EMA UNet trained with VDM on Pokemon dataset",
+        metadata=dict(cfg)
+    )
+    artifact.add_file(checkpoint_path)
+    wandb.log_artifact(artifact)
     run.finish()
 
 
