@@ -104,7 +104,7 @@ class InferenceRequest(BaseModel):
 # Load model
 # ---------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-image_shape = (3, 64, 64)
+image_shape = (3, 128, 128)
 
 # Initialize UNet and VDM
 unet_model = UNet(in_channels=3).to(device)

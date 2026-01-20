@@ -35,10 +35,10 @@ def main():
         project="MLOPS2026",
         config={
             "dataset": "Pokemon",
-            "epochs": 50,
+            "epochs": 100,
             "learning_rate": 5e-4,
             "batch_size": 64,
-            "image_size": 32,
+            "image_size": 64,
             "model": "UNet",
             "gamma_min": -13.3,
             "gamma_max": 5.0,
