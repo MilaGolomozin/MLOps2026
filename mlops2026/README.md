@@ -1,4 +1,4 @@
-# vdm_pokemon
+ # vdm_pokemon
 
 A short description of the project.
 
@@ -53,3 +53,24 @@ The directory structure of the project looks like this:
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
 started with Machine Learning Operations (MLOps).
+
+## Docker and Hydra
+
+```sh
+# 1 .docker build
+docker build \
+  -f dockerfiles/train.dockerfile \
+  -t vdm-pokemon-train .
+
+## 2. Docker Run
+docker run --rm \
+  -e WANDB_API_KEY=$WANDB_API_KEY \
+  vdm-pokemon-train
+
+## 3. Hydra Train
+#### #Change batch size and learning rate
+sh python -m vdm_pokemon.HydraTrain batch_size=128 learning_rate=1e-3 wandb.run_name=unet_bs128_lr1e-3
+
+
+
+

@@ -1,0 +1,7 @@
+2026-01-15 16:59:31.325 | DEBUG    | __main__:main:120 - Epoch 1 | Batch 0/143 | Loss: 15.6158
+2026-01-15 16:59:44.874 | DEBUG    | __main__:main:120 - Epoch 1 | Batch 50/143 | Loss: 5.6565
+2026-01-15 16:59:58.386 | DEBUG    | __main__:main:120 - Epoch 1 | Batch 100/143 | Loss: 7.1134
+2026-01-15 17:00:09.779 | INFO     | __main__:main:129 - Completed Epoch 1/1 | Avg Loss: 6.7876
+2026-01-15 17:00:17.217 | INFO     | __main__:main:170 - Training finished. Saving EMA model...
+2026-01-15 17:00:17.577 | SUCCESS  | __main__:main:173 - Model saved successfully as 'vdm_ema.pth'
+2026-01-15 17:00:19.140 | INFO     | __main__:main:178 - WandB run closed. HPC job exiting.

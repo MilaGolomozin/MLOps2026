@@ -1,16 +1,21 @@
 FROM python:3.12-slim AS base
 
-RUN apt update && \
-    apt install --no-install-recommends -y build-essential gcc && \
-    apt clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y build-essential gcc && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY src src/
-COPY requirements.txt requirements.txt
-COPY requirements_dev.txt requirements_dev.txt
-COPY README.md README.md
-COPY pyproject.toml pyproject.toml
 
-RUN pip install -r requirements.txt --no-cache-dir --verbose
-RUN pip install . --no-deps --no-cache-dir --verbose
+WORKDIR /app
 
-ENTRYPOINT ["python", "-u", "src/vdm_pokemon/train.py"]
+
+COPY . .
+
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+RUN pip install --no-cache-dir -e .
+
+
+ENTRYPOINT ["python", "src/vdm_pokemon/train.py"]
+
