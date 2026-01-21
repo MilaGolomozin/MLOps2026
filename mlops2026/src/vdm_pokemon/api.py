@@ -163,6 +163,7 @@ async def metrics_middleware(request: Request, call_next):
 # Input schema
 # ---------------------------
 class InferenceRequest(BaseModel):
+    """Define the request body for image generation."""
     batch_size: Optional[int] = 1
     n_sample_steps: Optional[int] = 250
 
@@ -182,8 +183,9 @@ vdm = VDM(
     gamma_max=5.0
 ).to(device)
 
-# Load trained EMA model weights
-vdm.model.load_state_dict(torch.load("vdm_ema.pth", map_location=device))
+weights_path = Path(os.getenv("VDM_WEIGHTS_PATH", "vdm_ema.pth"))
+if weights_path.is_file():
+    vdm.model.load_state_dict(torch.load(weights_path, map_location=device))
 vdm.eval()
 
 
@@ -204,7 +206,8 @@ def tensor_to_base64(img_tensor):
 # Health check
 # ---------------------------
 @app.get("/")
-def root():
+def root() -> dict[str, str]:
+    """Return a health check message."""
     return {"message": "VDM Pokémon Inference API is running"}
 
 
@@ -221,7 +224,8 @@ def metrics():
 # Inference endpoint
 # ---------------------------
 @app.post("/generate")
-def generate(req: InferenceRequest):
+def generate(req: InferenceRequest) -> Response:
+    """Generate a png image from the model."""
     with torch.no_grad():
         samples = vdm.sample(
             batch_size=1,                     # force single image
