@@ -10,7 +10,7 @@ def run_gpu_optimization():
     #note: the vdm model is exetremely heavy, thus training was done on the cluster given using hpc
     #the corresponding changes have been made to be able to run on gpu
     #for example in the quantization part the GPU equivalent of quantization was used, using 16-bit (FP16) 
-    #instead of 8-bit, which the V100 Tensor Cores can process at high speeds
+    #instead of 8-bit, which can be processed at high speeds
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Starting GPU Optimization on {torch.cuda.get_device_name(0)}")
 
