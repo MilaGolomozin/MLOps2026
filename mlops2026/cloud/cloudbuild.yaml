@@ -1,55 +1,19 @@
-steps:
-  - name: 'gcr.io/cloud-builders/gsutil'
-    id: 'Download source from bucket'
-    args: ['cp', 'gs://$BUCKET_NAME/$OBJECT_NAME', '/workspace/src.tar.gz']
-
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'Extract source'
-    entrypoint: 'bash'
-    args:
-      - -c
-      - |
-        mkdir -p /workspace/src
-        tar -xzf /workspace/src.tar.gz -C /workspace/src
-
-  # Build training image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build train image'
-    args: [
-      'build',
-      '/workspace/src/mlops2026',  # adjust to your project root inside the archive
-      '-t',
-      'europe-west1-docker.pkg.dev/$PROJECT_ID/first-project-02476-jan26/train:latest',
-      '-f',
-      '/workspace/src/mlops2026/dockerfiles/train.dockerfile'
-    ]
-
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push train image'
-    args: [
-      'push',
-      'europe-west1-docker.pkg.dev/$PROJECT_ID/first-project-02476-jan26/train:latest'
-    ]
-
-  # Build API image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build api image'
-    args: [
-      'build',
-      '/workspace/src/mlops2026',
-      '-t',
-      'europe-west1-docker.pkg.dev/$PROJECT_ID/repo1/api:latest',
-      '-f',
-      '/workspace/src/mlops2026/dockerfiles/api.dockerfile'
-    ]
-
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push api image'
-    args: [
-      'push',
-      'europe-west1-docker.pkg.dev/$PROJECT_ID/first-project-02476-jan26/api:latest'
-    ]
-
-
-options:
-  logging: CLOUD_LOGGING_ONLY
+ steps:
+    - name: 'gcr.io/cloud-builders/docker'
+      id: 'Build container image'
+      args: [
+        'build',
+        '/workspace/src/mlops2026',
+        '-t',
+        'europe-west1-docker.pkg.dev/$PROJECT_ID/first-project-02476-jan26/train:latest',
+        '-f',
+        '/workspace/src/mlops2026/dockerfiles/train.dockerfile'
+      ]
+    - name: 'gcr.io/cloud-builders/docker'
+      id: 'Push container image'
+      args: [
+        'push',
+        'europe-west1-docker.pkg.dev/$PROJECT_ID/first-project-02476-jan26/train:latest'
+      ]
+ options:
+    logging: CLOUD_LOGGING_ONLY
