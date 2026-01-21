@@ -1,0 +1,69 @@
+
+==============================
+SPEEDUP: 1.83x faster
+==============================
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 27665507: <vdm_benchmark> in cluster <dcc> Done
+
+Job <vdm_benchmark> was submitted from host <hpclogin1> by user <s250199> in cluster <dcc> at Wed Jan 21 18:33:37 2026
+Job was executed on host(s) <n-62-20-6>, in queue <gpuv100>, as user <s250199> in cluster <dcc> at Wed Jan 21 18:33:46 2026
+</zhome/07/3/219372> was used as the home directory.
+</zhome/07/3/219372/vision/vision/MLOps2026> was used as the working directory.
+Started at Wed Jan 21 18:33:46 2026
+Terminated at Wed Jan 21 18:34:26 2026
+Results reported at Wed Jan 21 18:34:26 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+### –- specify queue --
+#BSUB -q gpuv100
+### -- set the job Name --
+#BSUB -J vdm_benchmark
+### -- ask for number of cores --
+#BSUB -n 1
+### -- Select the resources: 1 gpu --
+#BSUB -gpu "num=1:mode=exclusive_process"
+### -- set walltime limit: 30 minutes is plenty for 15 epochs --
+#BSUB -W 0:30
+### -- request 8GB of system-memory (safer for data loading) --
+#BSUB -R "rusage[mem=8GB]"
+### -- Specify the output and error file. %J is the job-id --
+#BSUB -o vdm_%J.out
+#BSUB -e vdm_%J.err
+
+# 1. Activate your virtual environment
+source /zhome/07/3/219372/pokemon_env/bin/activate
+
+# 2. Run the training script
+# We keep your specific path from the second script
+python /zhome/07/3/219372/vision/vision/MLOps2026/mlops2026/src/vdm_pokemon/compare_inference.py
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   32.00 sec.
+    Max Memory :                                 1231 MB
+    Average Memory :                             554.00 MB
+    Total Requested Memory :                     8192.00 MB
+    Delta Memory :                               6961.00 MB
+    Max Swap :                                   -
+    Max Processes :                              12
+    Max Threads :                                38
+    Run time :                                   42 sec.
+    Turnaround time :                            49 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <vdm_27665507.err> for stderr output of this job.
+

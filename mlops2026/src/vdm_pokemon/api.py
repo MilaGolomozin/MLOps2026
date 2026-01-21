@@ -77,25 +77,87 @@
 # def root():
 #     return {"message": "VDM Pokémon Inference API is running"}
 
-import base64
 import io
-import os
-from pathlib import Path
+import base64
+import time
 from typing import Optional
 
 import torch
-from fastapi import FastAPI
-from fastapi.responses import Response
+import psutil
 from PIL import Image
+from fastapi import FastAPI, Request, Response
 from pydantic import BaseModel
+from prometheus_client import (
+    Counter,
+    Histogram,
+    Gauge,
+    generate_latest,
+    CONTENT_TYPE_LATEST,
+)
 
-from vdm_pokemon.model import VDM
-from vdm_pokemon.unet import UNet
+from model import VDM
+from unet import UNet
 
 # ---------------------------
 # FastAPI app
 # ---------------------------
 app = FastAPI(title="VDM Pokémon Inference API")
+
+# ---------------------------
+# Metrics definitions
+# ---------------------------
+
+# HTTP level metrics
+REQUEST_COUNT = Counter(
+    "api_requests_total",
+    "Total number of API requests",
+    ["method", "endpoint", "http_status"],
+)
+
+REQUEST_LATENCY = Histogram(
+    "api_request_latency_seconds",
+    "Latency of API requests in seconds",
+    ["endpoint"],
+)
+
+# System metrics
+CPU_USAGE = Gauge(
+    "system_cpu_percent",
+    "System-wide CPU usage percentage",
+)
+
+MEMORY_USAGE = Gauge(
+    "system_memory_percent",
+    "System-wide memory usage percentage",
+)
+
+
+# ---------------------------
+# Metrics middleware
+# ---------------------------
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    start_time = time.time()
+    response: Response = await call_next(request)
+    process_time = time.time() - start_time
+
+    endpoint = request.url.path
+
+    # Avoid polluting metrics with the metrics endpoint itself (optional)
+    if endpoint != "/metrics":
+        REQUEST_LATENCY.labels(endpoint=endpoint).observe(process_time)
+        REQUEST_COUNT.labels(
+            method=request.method,
+            endpoint=endpoint,
+            http_status=response.status_code,
+        ).inc()
+
+        # Update system metrics
+        CPU_USAGE.set(psutil.cpu_percent())
+        MEMORY_USAGE.set(psutil.virtual_memory().percent)
+
+    return response
+
 
 # ---------------------------
 # Input schema
@@ -105,11 +167,12 @@ class InferenceRequest(BaseModel):
     batch_size: Optional[int] = 1
     n_sample_steps: Optional[int] = 250
 
+
 # ---------------------------
 # Load model
 # ---------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-image_shape = (3, 64, 64)
+image_shape = (3, 128, 128)
 
 # Initialize UNet and VDM
 unet_model = UNet(in_channels=3).to(device)
@@ -125,16 +188,19 @@ if weights_path.is_file():
     vdm.model.load_state_dict(torch.load(weights_path, map_location=device))
 vdm.eval()
 
+
 # ---------------------------
-# Helper: tensor -> base64 image
+# Helper: tensor -> base64 image (currently unused but kept)
 # ---------------------------
-def tensor_to_base64(img_tensor: torch.Tensor) -> str:
-    """Convert a tensor image to a base64 encoded png string."""
-    img_tensor = (img_tensor.clamp(-1,1) + 1) / 2  # scale to [0,1]
-    img_pil = Image.fromarray((img_tensor.permute(1,2,0).cpu().numpy()*255).astype("uint8"))
+def tensor_to_base64(img_tensor):
+    img_tensor = (img_tensor.clamp(-1, 1) + 1) / 2  # scale to [0,1]
+    img_pil = Image.fromarray(
+        (img_tensor.permute(1, 2, 0).cpu().numpy() * 255).astype("uint8")
+    )
     buffered = io.BytesIO()
     img_pil.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
 
 # ---------------------------
 # Health check
@@ -143,6 +209,16 @@ def tensor_to_base64(img_tensor: torch.Tensor) -> str:
 def root() -> dict[str, str]:
     """Return a health check message."""
     return {"message": "VDM Pokémon Inference API is running"}
+
+
+# ---------------------------
+# Metrics endpoint
+# ---------------------------
+@app.get("/metrics")
+def metrics():
+    data = generate_latest()
+    return Response(content=data, media_type=CONTENT_TYPE_LATEST)
+
 
 # ---------------------------
 # Inference endpoint

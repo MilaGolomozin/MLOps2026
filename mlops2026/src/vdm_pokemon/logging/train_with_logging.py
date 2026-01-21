@@ -103,7 +103,7 @@ def main():
             optimizer.zero_grad()
             loss, metrics = vdm(x)
             
-            #Mathematical Stability 
+            #mathematical stability 
             if torch.isnan(loss) or torch.isinf(loss):
                 logger.critical(f"Numerical instability at Epoch {epoch+1}, Batch {batch_idx}!")
                 logger.error(f"Loss: {loss.item()} | Gamma Min: {cfg.gamma_min} | Gamma Max: {cfg.gamma_max}")
@@ -114,8 +114,8 @@ def main():
             optimizer.step()
             ema.update()
 
-            #Progress Heartbeat
-            # Log every 50 batches to the .log file
+            
+            #log every 50 batches to the .log file
             if batch_idx % 50 == 0:
                 logger.debug(f"Epoch {epoch+1} | Batch {batch_idx}/{len(train_loader)} | Loss: {loss.item():.4f}")
 
@@ -166,7 +166,7 @@ def main():
         wandb.log({
             "final/samples_grid": wandb.Image(grid)
         })
-    #Artifact Saving (REPLACES YOUR OLD LINES) ---
+    #artifact saving
     logger.info("Training finished. Saving EMA model...")
     try:
         torch.save(vdm_ema.model.state_dict(), "vdm_ema.pth")
