@@ -79,7 +79,9 @@
 
 import io
 import base64
+import os
 import time
+from pathlib import Path
 from typing import Optional
 
 import torch
@@ -95,8 +97,8 @@ from prometheus_client import (
     CONTENT_TYPE_LATEST,
 )
 
-from model import VDM
-from unet import UNet
+from vdm_pokemon.model import VDM
+from vdm_pokemon.unet import UNet
 
 # ---------------------------
 # FastAPI app
