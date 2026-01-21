@@ -9,3 +9,6 @@ omegaconf==2.3.0
 wandb==0.18.0
 torchvision==0.21.0
 ema-pytorch==0.4.8
+
+prometheus-client
+psutil
