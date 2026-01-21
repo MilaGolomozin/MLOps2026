@@ -12,6 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        
+        python-version: ["3.11", "3.12"] 
 
     runs-on: ${{ matrix.os }}
 
@@ -22,9 +24,12 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        
+        python-version: ${{ matrix.python-version }} 
         cache: 'pip'
         cache-dependency-path: 'mlops2026/requirements.txt'
+
+    
 
     - name: Install dependencies
       run: |
