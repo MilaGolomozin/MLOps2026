@@ -3,11 +3,11 @@
       id: 'Build container image'
       args: [
         'build',
-        '/workspace/src/mlops2026',
+        '/src/mlops2026',
         '-t',
         'europe-west1-docker.pkg.dev/$PROJECT_ID/first-project-02476-jan26/train:latest',
         '-f',
-        '/workspace/src/mlops2026/dockerfiles/train.dockerfile'
+        '/src/mlops2026/dockerfiles/train.dockerfile'
       ]
     - name: 'gcr.io/cloud-builders/docker'
       id: 'Push container image'
