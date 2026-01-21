@@ -8,7 +8,7 @@ from unet import UNet
 
 def run_gpu_optimization():
     #note: the vdm model is exetremely heavy, thus training was done on the cluster given using hpc
-    #the corresponding changes have been made to be able to run on gpu
+    #the corresponding changes have been made to be able to run on gpu in a more optimal way
     #for example in the quantization part the GPU equivalent of quantization was used, using 16-bit (FP16) 
     #instead of 8-bit, which can be processed at high speeds
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
