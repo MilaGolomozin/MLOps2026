@@ -18,7 +18,24 @@ steps:
       'europe-west1-docker.pkg.dev/$PROJECT_ID/repo1/train:latest'
     ]
 
+  # Build API image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build api image'
+    args: [
+      'build',
+      '.',
+      '-t',
+      'europe-west1-docker.pkg.dev/$PROJECT_ID/repo1/api:latest',
+      '-f',
+      'dockerfiles/api.dockerfile'
+    ]
 
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push api image'
+    args: [
+      'push',
+      'europe-west1-docker.pkg.dev/$PROJECT_ID/repo1/api:latest'
+    ]
 
 options:
   logging: CLOUD_LOGGING_ONLY
