@@ -1,3 +1,7 @@
+import pytest
+
+pytest.skip("This file is a manual visualization script and is not part of the automated test suite.", allow_module_level=True)
+
 import base64
 import io
 from PIL import Image
