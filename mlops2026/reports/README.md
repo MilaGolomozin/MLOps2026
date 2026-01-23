@@ -473,7 +473,7 @@ We implemented a frontend with streamlit for our application with a minimum func
 >
 > Answer:
 
-![Overview Diagram](figures/overviewDiagram.png)
+![Overview Diagram](figures/figureFinal.png)
 
 Our figure’s starting point is our local setup. Here we implement our Variational Diffusion Model and we include all the relevant files for the model implementation; data processing, model definition, training and api handling scripts. Our code is structured using the Cookiecutter template. 
 
